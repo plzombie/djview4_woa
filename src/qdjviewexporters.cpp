@@ -743,7 +743,11 @@ bool
 QDjViewPSExporter::loadPrintSetup(QPrinter *printer, QPrintDialog *dialog)
 {
   bool grayscale = (printer->colorMode() == QPrinter::GrayScale);
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
   bool landscape = (printer->orientation() == QPrinter::Landscape);
+#else
+  bool landscape = (printer->pageLayout().orientation() == QPageLayout::Landscape);
+#endif
   ui1.grayScaleButton->setChecked(grayscale);  
   ui1.colorButton->setChecked(!grayscale);  
   ui2.landscapeButton->setChecked(landscape);
@@ -783,7 +787,11 @@ QDjViewPSExporter::savePrintSetup(QPrinter *printer)
   bool g = ui1.grayScaleButton->isChecked();
   bool l = ui2.landscapeButton->isChecked();
   printer->setColorMode(g ? QPrinter::GrayScale : QPrinter::Color);
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
   printer->setOrientation(l ? QPrinter::Landscape : QPrinter::Portrait);
+#else
+  printer->setPageOrientation(l ? QPageLayout::Landscape : QPageLayout::Portrait);
+#endif
   return true;
 }
 
@@ -2098,7 +2106,11 @@ bool
 QDjViewPrnExporter::loadPrintSetup(QPrinter *printer, QPrintDialog *)
 {
   bool grayscale = (printer->colorMode() == QPrinter::GrayScale);
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
   bool landscape = (printer->orientation() == QPrinter::Landscape);
+#else
+  bool landscape = (printer->pageLayout().orientation() == QPageLayout::Landscape);
+#endif
   ui.grayScaleButton->setChecked(grayscale);  
   ui.colorButton->setChecked(!grayscale);  
   ui.landscapeButton->setChecked(landscape);
@@ -2113,7 +2125,11 @@ QDjViewPrnExporter::savePrintSetup(QPrinter *printer)
   bool grayscale = ui.grayScaleButton->isChecked();
   bool landscape = ui.landscapeButton->isChecked();
   printer->setColorMode(grayscale ? QPrinter::GrayScale : QPrinter::Color);
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
   printer->setOrientation(landscape ? QPrinter::Landscape : QPrinter::Portrait);
+#else
+  printer->setPageOrientation(landscape ? QPageLayout::Landscape : QPageLayout::Portrait);
+#endif
   return true;
 }
 
@@ -2181,7 +2197,11 @@ QDjViewPrnExporter::doPage()
   rect.x = rect.y = 0;
   rect.w = ddjvu_page_get_width(*page);
   rect.h = ddjvu_page_get_height(*page);
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
   QRect pageRect = printer->pageRect();
+#else
+  QRect pageRect = printer->pageLayout().paintRectPixels(printer->resolution());
+#endif
   bool landscape = false;
   int prndpi = printer->resolution();
   int imgdpi = ddjvu_page_get_resolution(*page);

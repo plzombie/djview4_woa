@@ -37,7 +37,11 @@
 #include <QPainter>
 #include <QPointer>
 #include <QRect>
-#include <QRegExpValidator>
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+# include <QRegExpValidator>
+#else
+# include <QRegularExpressionValidator>
+#endif
 #include <QSettings>
 #include <QStringList>
 #include <QTranslator>
@@ -699,8 +703,13 @@ QDjViewModifiersComboBox::QDjViewModifiersComboBox(QWidget *parent)
   QString keys = "(" + keynames.join("|") + ")";
   keys = keys + "(\\+" + keys + ")*";
   keys = keys + "|" + none;
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
   QRegExp re( keys, Qt::CaseInsensitive);
   setValidator(new QRegExpValidator(re, this));
+#else
+  QRegularExpression re( keys, QRegularExpression::NoPatternOption);
+  setValidator(new QRegularExpressionValidator(re, this));
+#endif
   // menu entries
   insertValue(Qt::ShiftModifier);
   insertValue(Qt::ControlModifier);
@@ -817,7 +826,7 @@ QDjViewPrefsDialog::QDjViewPrefsDialog()
   d->currentSaved = -1;
   
   // prepare ui
-  setAttribute(Qt::WA_GroupLeader, true);
+  setWindowModality(Qt::WindowModal); //setAttribute(Qt::WA_GroupLeader, true);
   d->ui.setupUi(this);
   
   // connect buttons (some are connected in the ui file)
@@ -1268,7 +1277,11 @@ QDjViewPrefsDialog::modeComboChanged(int n)
       bool okay;
       int zoomIndex = d->ui.zoomCombo->currentIndex();
       QString zoomText = d->ui.zoomCombo->lineEdit()->text();
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
       int zoom = zoomText.replace(QRegExp("\\s*%?$"),"").trimmed().toInt(&okay);
+#else
+      int zoom = zoomText.replace(QRegularExpression("\\s*%?$"),"").trimmed().toInt(&okay);
+#endif
       if (okay && zoom>=QDjVuWidget::ZOOM_MIN && zoom<=QDjVuWidget::ZOOM_MAX)
         saved.zoom = zoom;
       else if (zoomIndex >= 0)
@@ -1322,7 +1335,11 @@ QDjViewPrefsDialog::zoomComboEdited()
 {
   bool okay;
   QString zoomText = d->ui.zoomCombo->lineEdit()->text();
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
   int zoom = zoomText.replace(QRegExp("\\s*%?$"),"").trimmed().toInt(&okay);
+#else
+  int zoom = zoomText.replace(QRegularExpression("\\s*%?$"),"").trimmed().toInt(&okay);
+#endif
   if (d->ui.zoomCombo->findText(zoomText) >= 0)
     d->ui.zoomCombo->setEditText(zoomText);
   else if (okay && zoom >= QDjVuWidget::ZOOM_MIN 

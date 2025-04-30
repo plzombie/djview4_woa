@@ -40,7 +40,11 @@
 #include <QFileOpenEvent>
 #include <QLibraryInfo>
 #include <QLocale>
-#include <QRegExp>
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+# include <QRegExp>
+#else
+# include <QRegularExpression>
+#endif
 #include <QSettings>
 #include <QSessionManager>
 #include <QString>
@@ -272,7 +276,11 @@ static bool loadOneTranslator(QTranslator *trans,
   QString llang = lang.toLower();
   foreach (QString dir, dirs)
     {
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
       dir = dir.replace(QRegExp("\\$LANG(?!\\w)"), lang);
+#else
+      dir = dir.replace(QRegularExpression("\\$LANG(?!\\w)"), lang);
+#endif
       QDir qdir(dir);
       if (qdir.exists())
         {
@@ -493,7 +501,11 @@ main(int argc, char *argv[])
   while (qi < qargv.size() && qargv.at(qi)[0] == '-')
     {
       QString arg = qargv.at(qi);
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
       arg.replace(QRegExp("^-+"),"");
+#else
+      arg.replace(QRegularExpression("^-+"),"");
+#endif
       QString key = arg.section(QChar('='),0,1);
       if (arg == "help")
         usage();
@@ -515,7 +527,11 @@ main(int argc, char *argv[])
     {
       QString name = qargv.at(qi);
       bool okay = true;
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
       if (name.contains(QRegExp("^[a-zA-Z]{3,8}:/")))
+#else
+      if (name.contains(QRegularExpression("^[a-zA-Z]{3,8}:/")))
+#endif
         okay = main->open(QUrl(name));
       else
         okay = main->open(name);

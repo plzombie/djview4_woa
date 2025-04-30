@@ -34,6 +34,9 @@
 #include <QFileInfo>
 #include <QList>
 #include <QMutex>
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+# include <QRecursiveMutex>
+#endif
 #include <QMutexLocker>
 #include <QPair>
 #include <QSet>
@@ -221,7 +224,11 @@ class QDjVuDocumentPrivate : public QObject
 {
   Q_OBJECT
 public:
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
   QMutex mutex;
+#else
+  QRecursiveMutex mutex;
+#endif
   bool autoDelete;
   int refCount;
   QSet<QObject*> running;
@@ -246,7 +253,11 @@ signals:
 };
 
 QDjVuDocumentPrivate::QDjVuDocumentPrivate()
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
   : mutex(QMutex::Recursive),
+#else
+  : mutex(),
+#endif
     autoDelete(false), 
     refCount(0),
     docReady(false), 

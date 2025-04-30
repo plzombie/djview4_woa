@@ -49,6 +49,9 @@
 #include <QPushButton>
 #include <QPixmap>
 #include <QRegExp>
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#include <QRegularExpression>
+#endif
 #include <QResizeEvent>
 #include <QStackedLayout>
 #include <QStringList>
@@ -100,7 +103,7 @@ QDjViewOutline::QDjViewOutline(QDjView *djview)
   tree->setSelectionMode(QAbstractItemView::SingleSelection);
   tree->setTextElideMode(Qt::ElideRight);
   QVBoxLayout *layout = new QVBoxLayout(this);
-  layout->setMargin(0);
+  layout->setContentsMargins(0, 0, 0, 0);
   layout->setSpacing(0);
   layout->addWidget(tree);
 
@@ -209,7 +212,11 @@ QDjViewOutline::pageNumber(const char *link)
 }
 
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 static const QRegExp spaces("\\s+");
+#else
+static const QRegularExpression spaces("\\s+");
+#endif
 
 void 
 QDjViewOutline::fillItems(QTreeWidgetItem *root, miniexp_t expr)
@@ -406,7 +413,12 @@ QStyleOptionViewItem
 QDjViewThumbnails::View::viewOptions() const
 {
   int size = widget->model->getSize();
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
   QStyleOptionViewItem opt = QListView::viewOptions();
+#else
+  QStyleOptionViewItem opt;
+  QListView::initViewItemOption(&opt);
+#endif
   opt.decorationAlignment = Qt::AlignCenter;
   opt.decorationPosition = QStyleOptionViewItem::Top;
   opt.decorationSize = QSize(size, size);
@@ -709,7 +721,7 @@ QDjViewThumbnails::QDjViewThumbnails(QDjView *djview)
   view->setSelectionModel(selection);
 
   QVBoxLayout *layout = new QVBoxLayout(this);
-  layout->setMargin(0);
+  layout->setContentsMargins(0, 0, 0, 0);
   layout->setSpacing(0);
   layout->addWidget(view);
   
@@ -1464,7 +1476,11 @@ QDjViewFind::Model::nextHit(bool backwards)
       startFind(backwards);
     }
   searchBackwards = backwards;
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
   if (! find.isEmpty())
+#else
+  if (! find.pattern().isEmpty())
+#endif
     {
       pending = true;
       doPending();
@@ -1479,7 +1495,11 @@ QDjViewFind::Model::startFind(bool backwards, int delay)
 {
   stopFind();
   searchBackwards = backwards;
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
   if (! find.isEmpty() && djview->pageNum() > 0)
+#else
+  if (! find.pattern().isEmpty() && djview->pageNum() > 0)
+#endif
     {
       widget->label->setText(QString());
       widget->stack->setCurrentWidget(widget->view);
@@ -1556,8 +1576,13 @@ QDjViewFind::Model::textChanged()
     {
       if (!regExpMode)
         {
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
           s = QRegExp::escape(widget->text());
           s.replace(QRegExp("\\s+"), " ");
+#else
+          s = QRegularExpression::escape(widget->text());
+          s.replace(QRegularExpression("\\s+"), " ");
+#endif
         }
       if (wordOnly)
         s = "\\b" + s;

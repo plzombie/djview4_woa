@@ -72,7 +72,11 @@
 #include <QPrintDialog>
 #include <QPrintEngine>
 #include <QPushButton>
-#include <QRegExp>
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+# include <QRegExp>
+#else
+# include <QRegularExpression>
+#endif
 #include <QScrollBar>
 #include <QSettings>
 #include <QShortcut>
@@ -127,7 +131,7 @@ QDjViewErrorDialog::QDjViewErrorDialog(QWidget *parent)
     d(new Private)
 {
   d->ui.setupUi(this);
-  d->ui.textEdit->viewport()->setBackgroundRole(QPalette::Background);
+  d->ui.textEdit->viewport()->setBackgroundRole(QPalette::Window);
   setWindowTitle(tr("DjView Error"));
 }
 
@@ -148,7 +152,11 @@ QDjViewErrorDialog::error(QString msg, QString, int)
 {
   // Remove [1-nnnnn] prefix from djvulibre-3.5
   if (msg.startsWith("["))
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     msg = msg.replace(QRegExp("^\\[\\d*-?\\d*\\]\\s*") , "");
+#else
+    msg = msg.replace(QRegularExpression("^\\[\\d*-?\\d*\\]\\s*") , "");
+#endif
 #if QT_VERSION >= 0x50000
   msg = msg.toHtmlEscaped();
 #else
@@ -293,7 +301,7 @@ QDjViewInfoDialog::QDjViewInfoDialog(QDjView *parent)
   font.setFamily("monospace");
   font.setPointSize((font.pointSize() * 5 + 5) / 6);
   d->ui.fileText->setFont(font);
-  d->ui.fileText->viewport()->setBackgroundRole(QPalette::Background);
+  d->ui.fileText->viewport()->setBackgroundRole(QPalette::Window);
   
   QStringList labels;
   d->ui.docTable->setColumnCount(6);
@@ -951,7 +959,7 @@ QDjViewSaveDialog::QDjViewSaveDialog(QDjView *djview)
   d->exporter = 0;
 
   d->ui.setupUi(this);
-  setAttribute(Qt::WA_GroupLeader, true);
+  setWindowModality(Qt::WindowModal); //setAttribute(Qt::WA_GroupLeader, true);
 
   connect(d->ui.okButton, SIGNAL(clicked()), 
           this, SLOT(start()));
@@ -1232,7 +1240,7 @@ QDjViewExportDialog::QDjViewExportDialog(QDjView *djview)
   d->exporter = 0;
 
   d->ui.setupUi(this);
-  setAttribute(Qt::WA_GroupLeader, true);
+  setWindowModality(Qt::WindowModal); //setAttribute(Qt::WA_GroupLeader, true);
 
   connect(d->ui.okButton, SIGNAL(clicked()), 
           this, SLOT(start()));
@@ -1584,7 +1592,7 @@ QDjViewPrintDialog::QDjViewPrintDialog(QDjView *djview)
   d->exporter = 0;
   d->printer = new QPrinter(QPrinter::HighResolution);
   d->ui.setupUi(this);
-  setAttribute(Qt::WA_GroupLeader, true);
+  setWindowModality(Qt::WindowModal); //setAttribute(Qt::WA_GroupLeader, true);
   connect(d->ui.okButton, SIGNAL(clicked()), 
           this, SLOT(start()));
   connect(d->ui.stopButton, SIGNAL(clicked()), 
@@ -1755,11 +1763,11 @@ QDjViewPrintDialog::choose()
       d->exporter->savePrintSetup(d->printer);
       QPrintDialog *dialog = new QPrintDialog(d->printer, this);
       // options
-      QPrintDialog::PrintDialogOptions options = dialog->enabledOptions();
+      QPrintDialog::PrintDialogOptions options = dialog->options();
       options |= QPrintDialog::PrintCollateCopies;
       options &= ~QPrintDialog::PrintToFile;
       options &= ~QPrintDialog::PrintSelection;
-      dialog->setEnabledOptions(options);
+      dialog->setOptions(options);
       // copy page spec
       int pagenum = d->djview->pageNum();
       int curpage = d->djview->getDjVuWidget()->page();
