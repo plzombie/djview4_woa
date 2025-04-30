@@ -8,9 +8,14 @@
 This package contains the djview4 viewer and browser plugin.
 This new viewer relies on the DjVulibre library and the Qt toolkit.
 
+The difference between this fork and official djview4 is the support for Qt6
+and other stuff needed to compile Win32 ARM64 target (ie WoA).
+The goal is to get working binary on Windows 10 for ARM.
+All rights to changes are alienated in favor of the official djview4 version.
+
 Highlights:
 - entirely based on the public djvulibre api.
-- entirely written in portable Qt4/Qt5.
+- entirely written in portable Qt4/Qt5/Qt6.
 - works natively under Unix/X11, MS Windows, and MacOS X.
 - continuous scrolling of pages
 - side-by-side display of pages
@@ -25,7 +30,7 @@ Highlights:
 
 Prerequisites:
 - DjVuLibre >= 3.5.18
-- Qt >= 4.4
+- Qt >= 4.5
 
 
 
@@ -66,7 +71,7 @@ See http://djvu.sourceforge.net for the
 source code and for pointers to binary packages.
 Under debian type "apt-get install libdjvulibre-dev"
 
-You need Qt4 (>= 4.4.0) or QT5 (tested with 5.2)
+You need Qt4 (>= 4.5.0) or QT5 (tested with 5.12.12) or QT6 (tested with 6.7.3)
 See http://trolltech.com for the source code.
 Select the version of Qt adapted to your platform.
 Under debian type "apt-get install libqt4-dev qt4-dev-tools
@@ -221,5 +226,11 @@ There are also two ways to compile djview under Windows.
   - Then compile using 
        $ mingw32-make SHELL=cmd.exe
     
+* Using CMAKE
+
+  - Use option DJVIEW_USE_QT6 to target to Qt6 (otherwise use Qt5).
+  - Define DJVULIBRE_INCLUDE with path to djvulibre folder.
+  - Define DJVULIBRE_LIBRARY with path to folder with
+    compiled djvulibre binaries.
 
 
